@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: river-workflow-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: river-workflow
+  template:
+    metadata:
+      labels:
+        app: river-workflow
+    spec:
+      containers:
+      - name: river-workflow
+        image: river.azurecr.io/river-workflow:v2
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: '/mnt/azure'
+          name: river-disk
+        - mountPath: '/inetpub/wwwroot/appsettings.json'
+          subPath: 'wrkflw/appsettings.json'
+          name: river-disk
+        - mountPath: '/inetpub/wwwroot/bin/appsettings.json'
+          subPath: 'wrkflw/appsettings.json'
+          name: river-disk
+      volumes:
+      - name: river-disk
+        persistentVolumeClaim:
+          claimName: river-disk
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: river-workflow-service
+spec:
+  selector:
+    app: river-workflow
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: LoadBalancer

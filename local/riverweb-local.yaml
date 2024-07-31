@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: river-web
+  labels:
+    app: river-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: river-web
+  template:
+    metadata:
+      labels:
+        app: river-web
+    spec:
+      imagePullSecrets:
+      - name: acr-credentials
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: river-web
+        image: river.azurecr.io/river-web:v1
+        env:
+        - name: ENVIRONMENT
+          value: "Production"
+        ports:
+        - name: "http"
+          containerPort: 80
+        command: ["/bin/sh", "-c", "nginx -g 'daemon off;'"]
+        volumeMounts:
+        - mountPath: "/mnt/azure"
+          name: river-disk
+        - mountPath: "/usr/share/nginx/html/app-config.json"
+          subPath: "web/app-config.json"
+          name: river-disk
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+      volumes:
+      - name: river-disk
+        persistentVolumeClaim:
+          claimName: river-disk
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: river-web
+spec:
+  selector:
+    app: river-web
+  ports:
+  - name: "http"
+    protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30000
+  type: LoadBalancer
