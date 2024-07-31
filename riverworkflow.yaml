@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: river-workflow-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: river-workflow
+  template:
+    metadata:
+      labels:
+        app: river-workflow
+    spec:
+      imagePullSecrets:
+      - name: acr-credentials
+      nodeSelector:
+        "kubernetes.io/os": windows
+      containers:
+      - name: river-workflow
+        image: river.azurecr.io/river-workflow:v2
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: 'C:\mnt\azure'
+          name: azure-disk
+        - mountPath: 'C:\inetpub\wwwroot\appsettings.json'
+          subPath: 'wrkflw\appsettings.json'
+          name: azure-disk
+        - mountPath: 'C:\inetpub\wwwroot\bin\appsettings.json'
+          subPath: 'wrkflw\appsettings.json'
+          name: azure-disk
+      volumes:
+      - name: azure-disk
+        persistentVolumeClaim:
+          claimName: river-azure-disk
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: river-workflow-service
+spec:
+  selector:
+    app: river-workflow
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: LoadBalancer

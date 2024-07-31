@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: river-api
+  labels:
+    app: river-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: river-api
+  template:
+    metadata:
+      labels:
+        app: river-api
+    spec:
+      imagePullSecrets:
+      - name: acr-credentials
+      nodeSelector:
+        "kubernetes.io/os": windows  # Changed to target Linux nodes
+      containers:
+      - name: river-api
+        image: river.azurecr.io/river-rest-api:v3
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        volumeMounts:
+        - mountPath: 'C:\mnt\azure'
+          name: azure-disk
+        - mountPath: 'C:\app\appsettings.json'
+          subPath: 'api\appsettings.json'  # Updated subPath for Linux paths
+          name: azure-disk
+      volumes:
+      - name: azure-disk
+        persistentVolumeClaim:
+          claimName: river-azure-disk
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: river-api
+spec:
+  selector:
+    app: river-api
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    name: http
+  - protocol: TCP
+    port: 443
+    targetPort: 443
+    name: https
+  type: LoadBalancer
