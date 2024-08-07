@@ -1,0 +1,9 @@
+
+
+# kubeconfig files require a context. Provide one for the API Server.
+current-context: webhook
+contexts:
+- context:
+    cluster: kubernetes
+    user: system:node:k8smaster
+  name: webhook

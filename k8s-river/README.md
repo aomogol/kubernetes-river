@@ -1,6 +1,14 @@
-# kubernetes-river
+# k8s-cluster
 
 
+
+
+
+
+
+
+
+ev______
 
 Your Kubernetes control-plane has initialized successfully!
 
@@ -18,7 +26,15 @@ You should now deploy a pod network to the cluster.
 Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
   https://kubernetes.io/docs/concepts/cluster-administration/addons/
 
+You can now join any number of control-plane nodes by copying certificate authorities
+and service account keys on each node and then running the following as root:
+
+  kubeadm join 192.168.1.201:6443 --token em9tlj.4m3cb535eig83vtk \
+	--discovery-token-ca-cert-hash sha256:2016b1d72957db103413e9bcf19f8658b203657317f7e85801e498c0f917acba \
+	--control-plane 
+
 Then you can join any number of worker nodes by running the following on each as root:
 
-        kubeadm join 192.168.1.201:6443 --token ss34vr.pc3be0bo7y4kem7i \
-            --discovery-token-ca-cert-hash sha256:60c7d32581977b8350a05bff78a9939dfc662624dd4414349ed61ab20633c68c 
+kubeadm join 192.168.1.201:6443 --token em9tlj.4m3cb535eig83vtk \
+	--discovery-token-ca-cert-hash sha256:2016b1d72957db103413e9bcf19f8658b203657317f7e85801e498c0f917acba 
+5431""123
